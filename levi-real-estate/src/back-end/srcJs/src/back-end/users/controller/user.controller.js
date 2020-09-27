@@ -8,8 +8,19 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+var __rest = (this && this.__rest) || function (s, e) {
+    var t = {};
+    for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p) && e.indexOf(p) < 0)
+        t[p] = s[p];
+    if (s != null && typeof Object.getOwnPropertySymbols === "function")
+        for (var i = 0, p = Object.getOwnPropertySymbols(s); i < p.length; i++) {
+            if (e.indexOf(p[i]) < 0 && Object.prototype.propertyIsEnumerable.call(s, p[i]))
+                t[p[i]] = s[p[i]];
+        }
+    return t;
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.loginUser = exports.createUser = void 0;
+exports.createUser = void 0;
 const userService_1 = require("../service/userService");
 exports.createUser = (user) => __awaiter(void 0, void 0, void 0, function* () {
     try {
@@ -20,22 +31,22 @@ exports.createUser = (user) => __awaiter(void 0, void 0, void 0, function* () {
                 throw { message: 'email already exists' };
         }
         const userDto = yield userService_1.addUser(user);
-        return userService_1.transformDtoToResponseVM(userDto);
+        const { password } = userDto, other = __rest(userDto, ["password"]);
+        return other;
     }
     catch (e) {
         return e;
     }
 });
-exports.loginUser = (user) => __awaiter(void 0, void 0, void 0, function* () {
-    try {
-        const userDto = yield userService_1.getUserByPhonePassword(user);
-        if (userDto === null || userDto === undefined)
-            throw { message: 'Inputs are invalid' };
-        const token = userService_1.generateAuthToken(userDto.id);
-        const userToRes = userService_1.transformDtoToResponseVM(userDto);
-        return Object.assign(Object.assign({}, userToRes), { token });
+/*export const loginUser = async (user:UserLoginRequestVM):Promise<UserLoginResponseVM|ErrorResponse> =>{
+    try{
+        const userDto = await getUserByPhonePassword(user);
+        if(userDto === null || userDto === undefined)
+            throw {message:'Inputs are invalid'};
+        
+        
     }
-    catch (e) {
-        return e;
+    catch(e){
+
     }
-});
+}*/ 

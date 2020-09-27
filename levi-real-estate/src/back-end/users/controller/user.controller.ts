@@ -1,7 +1,9 @@
 import {UserRequestVM} from '../interfaces/vm/user-request.vm'
 import {ErrorResponse} from '../../error/interfaces/error.interface'
-import {checkIfPropUnique, addUser} from '../service/userService'
+import {checkIfPropUnique, addUser, getUserByPhonePassword, generateAuthToken,transformDtoToResponseVM} from '../service/userService'
 import {UserResponseVM} from '../interfaces/vm/user-response.vm'
+import {UserLoginRequestVM} from '../interfaces/vm/user-login-request.vm'
+import {UserLoginResponseVM} from '../interfaces/vm/user-login-response.vm'
 import axios = require('axios');
 
 
@@ -15,12 +17,24 @@ export const createUser = async (user:UserRequestVM) : Promise<UserResponseVM|Er
         }
 
         const userDto = await addUser(user);
-        const {password, ...other} = userDto;
-        return other;
-
+        return transformDtoToResponseVM(userDto);
     }
     catch(e){
         return e;
     }
     
+}
+
+export const loginUser = async (user:UserLoginRequestVM):Promise<UserLoginResponseVM|ErrorResponse> =>{
+    try{
+        const userDto = await getUserByPhonePassword(user);
+        if(userDto === null || userDto === undefined)
+            throw {message:'Inputs are invalid'};
+        const token = generateAuthToken(userDto.id);
+        const userToRes = transformDtoToResponseVM(userDto);
+        return {...userToRes,token};
+    }
+    catch(e){
+        return e;
+    }
 }

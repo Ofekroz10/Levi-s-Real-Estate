@@ -5,5 +5,6 @@ export interface UserDto{
     phone:string,
     email:string,
     role:UserRole,
-    password:string
+    password:string,
+    id:string
 }
