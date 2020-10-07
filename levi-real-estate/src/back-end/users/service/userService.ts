@@ -65,19 +65,36 @@ export const transformDtoToResponseVM = (user:UserDto):UserResponseVM=>{
     return other;
 }
 
-//need to check
+export const saveUserInDB = async(user:UserDto)=>{
+    const ref = firebase.ref('Users');
+    const results = await ref.child(user.id).once('value');
+    const resultsJSON = results.toJSON() as UserDto;
+
+    Object.keys(user).forEach(x=>{
+        user[x] !== resultsJSON[x] ? resultsJSON[x] = user[x] : null; 
+    })
+
+    return await ref.child(user.id).update(resultsJSON);
+}
+
+//need to checkg
 export const authMiddleWare =async (token:string):Promise<UserDto>=>{
     dotenv.config();
     const secret = (`${process.env.SECRET}`);
     const {id} = jwt.verify(token, secret) as {id:string};
     const ref = firebase.ref('Users');
     const results = await ref.child(id).once('value');
-    const resultsJSON = results.toJSON();
+    const resultsJSON = results.toJSON() as UserDto;
     if(resultsJSON === null || resultsJSON === undefined)
         throw {message:'please authenticate'};
     else{
         //@ts-ignore
-        const resultWithId = {id:Object.keys(resultsJSON)[0],...resultsJSON[Object.keys(resultsJSON)[0]]};
+        const resultWithId = {id:id,...resultsJSON};
         return resultWithId;
     }
+}
+
+export const authRoleMidddleWare = async (token:string):Promise<UserRole>=>{
+    const {role} = await authMiddleWare(token);
+    return role;
 }

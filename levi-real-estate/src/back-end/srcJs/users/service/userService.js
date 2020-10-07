@@ -20,7 +20,7 @@ var __rest = (this && this.__rest) || function (s, e) {
     return t;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.authMiddleWare = exports.transformDtoToResponseVM = exports.generateAuthToken = exports.getUserByPhonePassword = exports.addUser = exports.checkIfPropUnique = void 0;
+exports.authRoleMidddleWare = exports.authMiddleWare = exports.saveUserInDB = exports.transformDtoToResponseVM = exports.generateAuthToken = exports.getUserByPhonePassword = exports.addUser = exports.checkIfPropUnique = void 0;
 const firebase_1 = require("../../firebase/firebase");
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
@@ -70,6 +70,16 @@ exports.transformDtoToResponseVM = (user) => {
     const { password } = user, other = __rest(user, ["password"]);
     return other;
 };
+exports.saveUserInDB = (user) => __awaiter(void 0, void 0, void 0, function* () {
+    const ref = firebase_1.firebase.ref('Users');
+    const results = yield ref.child(user.id).once('value');
+    const resultsJSON = results.toJSON();
+    Object.keys(user).forEach(x => {
+        user[x] !== resultsJSON[x] ? resultsJSON[x] = user[x] : null;
+    });
+    return yield ref.child(user.id).update(resultsJSON);
+});
+//need to checkg
 exports.authMiddleWare = (token) => __awaiter(void 0, void 0, void 0, function* () {
     dotenv.config();
     const secret = (`${process.env.SECRET}`);
@@ -81,7 +91,11 @@ exports.authMiddleWare = (token) => __awaiter(void 0, void 0, void 0, function* 
         throw { message: 'please authenticate' };
     else {
         //@ts-ignore
-        const resultWithId = Object.assign({ id: Object.keys(resultsJSON)[0] }, resultsJSON[Object.keys(resultsJSON)[0]]);
+        const resultWithId = Object.assign({ id: id }, resultsJSON);
         return resultWithId;
     }
+});
+exports.authRoleMidddleWare = (token) => __awaiter(void 0, void 0, void 0, function* () {
+    const { role } = yield exports.authMiddleWare(token);
+    return role;
 });

@@ -6,5 +6,6 @@ export interface UserDto{
     email:string,
     role:UserRole,
     password:string,
-    id:string
+    id:string,
+    [index: string]:any
 }
