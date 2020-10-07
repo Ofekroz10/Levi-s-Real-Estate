@@ -9,8 +9,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.loginUser = exports.createUser = void 0;
+exports.updateUser = exports.loginUser = exports.createUser = void 0;
 const userService_1 = require("../service/userService");
+const user_transformer_1 = require("../transformer/user-transformer");
 exports.createUser = (user) => __awaiter(void 0, void 0, void 0, function* () {
     try {
         if (!(yield userService_1.checkIfPropUnique('phone', user.phone.toString())))
@@ -38,4 +39,16 @@ exports.loginUser = (user) => __awaiter(void 0, void 0, void 0, function* () {
     catch (e) {
         return e;
     }
+});
+exports.updateUser = (token, user) => __awaiter(void 0, void 0, void 0, function* () {
+    const userDto = yield userService_1.authMiddleWare(token);
+    const toUserDto = user_transformer_1.toUser(user, userDto);
+    yield userService_1.saveUserInDB(toUserDto);
+    return userService_1.transformDtoToResponseVM(toUserDto); // if wants to return only the changes write 'return updateUser'
+});
+exports.loginUser({ phone: '43', password: '0544' }).then((x) => {
+    const user = x;
+    exports.updateUser(user.token, { name: 'ofek', phone: '56' }).then(x => {
+        console.log(x);
+    });
 });
